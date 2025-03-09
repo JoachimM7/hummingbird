@@ -102,6 +102,20 @@ public struct HTTP2UpgradeChannel: HTTPChannelHandler {
         self.http2 = HTTP2Channel(responder: responder, configuration: configuration)
     }
 
+    public init(
+        tlsChannelConfiguration: TLSChannelConfiguration,
+        configuration: Configuration = .init(),
+        http1ChannelHandler: HTTP1Channel,
+        responder: @escaping HTTPChannelHandler.Responder
+    ) throws {
+        var tlsChannelConfiguration = tlsChannelConfiguration
+        tlsChannelConfiguration.tlsConfiguration.applicationProtocols = NIOHTTP2SupportedALPNProtocols
+        self.tlsChannelConfiguration = try .init(configuration: tlsChannelConfiguration)
+        self.configuration = configuration
+        self.http1 = http1ChannelHandler //HTTP1Channel(responder: responder, configuration: configuration.streamConfiguration)
+        self.http2 = HTTP2Channel(responder: responder, configuration: configuration)
+    }
+
     /// Setup child channel for HTTP1 with HTTP2 upgrade
     /// - Parameters:
     ///   - channel: Child channel
