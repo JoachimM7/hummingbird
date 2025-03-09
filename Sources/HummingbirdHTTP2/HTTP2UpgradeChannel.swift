@@ -84,6 +84,20 @@ public struct HTTP2UpgradeChannel: HTTPChannelHandler {
         self.http2 = HTTP2Channel(responder: responder, configuration: configuration)
     }
 
+    public init(
+        tlsConfiguration: TLSConfiguration,
+        configuration: Configuration = .init(),
+        http1: HTTP1Channel,
+        responder: @escaping HTTPChannelHandler.Responder
+    ) throws {
+        var tlsConfiguration = tlsConfiguration
+        tlsConfiguration.applicationProtocols = NIOHTTP2SupportedALPNProtocols
+        self.tlsChannelConfiguration = try .init(configuration: .init(tlsConfiguration: tlsConfiguration))
+        self.configuration = configuration
+        self.http1 = http1
+        self.http2 = HTTP2Channel(responder: responder, configuration: configuration)
+    }
+
     ///  Initialize HTTP2UpgradeChannel
     /// - Parameters:
     ///   - tlsConfiguration: TLS configuration
@@ -99,20 +113,6 @@ public struct HTTP2UpgradeChannel: HTTPChannelHandler {
         self.tlsChannelConfiguration = try .init(configuration: tlsChannelConfiguration)
         self.configuration = configuration
         self.http1 = HTTP1Channel(responder: responder, configuration: configuration.streamConfiguration)
-        self.http2 = HTTP2Channel(responder: responder, configuration: configuration)
-    }
-
-    public init(
-        tlsChannelConfiguration: TLSChannelConfiguration,
-        configuration: Configuration = .init(),
-        http1ChannelHandler: HTTP1Channel,
-        responder: @escaping HTTPChannelHandler.Responder
-    ) throws {
-        var tlsChannelConfiguration = tlsChannelConfiguration
-        tlsChannelConfiguration.tlsConfiguration.applicationProtocols = NIOHTTP2SupportedALPNProtocols
-        self.tlsChannelConfiguration = try .init(configuration: tlsChannelConfiguration)
-        self.configuration = configuration
-        self.http1 = http1ChannelHandler //HTTP1Channel(responder: responder, configuration: configuration.streamConfiguration)
         self.http2 = HTTP2Channel(responder: responder, configuration: configuration)
     }
 
