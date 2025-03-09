@@ -71,6 +71,20 @@ extension HTTPServerBuilder {
         }
     }
 
+    public static func http2Upgrade(
+        tlsConfiguration: TLSConfiguration,
+        http1: HTTP1Channel,
+        configuration: HTTP2UpgradeChannel.Configuration = .init()
+    ) throws -> HTTPServerBuilder {
+        .init { responder in
+            try HTTP2UpgradeChannel(
+                tlsConfiguration: tlsConfiguration,
+                http1: http1,
+                responder: responder
+            )
+        }
+    }
+
     ///  Build HTTP channel with HTTP2 upgrade
     ///
     /// Use in ``Hummingbird/Application`` initialization.
